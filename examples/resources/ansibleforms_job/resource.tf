@@ -1,18 +1,3 @@
-terraform {
-  required_providers {
-    ansibleforms = {
-      source = "hashicorp.com/se/ansibleforms"
-    }
-  }
-  required_version = ">= 0.0.1"
-}
-
-provider "ansibleforms" {
-  username = "admin" # Publicly available by Ansible Forms
-  password = "AnsibleForms!123" # Publicly available by Ansible Forms
-  host = "https://127.0.0.1:8443" # Publicly available by Ansible Forms
-}
-
 resource "ansibleforms_job" "se" {
   form_name = "AXA Share Create"
   extravars = {
