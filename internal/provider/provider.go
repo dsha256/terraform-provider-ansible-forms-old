@@ -5,10 +5,9 @@ package provider
 
 import (
 	"context"
-	"os"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -18,198 +17,147 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ provider.Provider = &ansibleformsProvider{}
+	_ provider.Provider = &AnsibleFormsProvider{}
 )
 
-// New is a helper function to simplify provider server and testing implementation.
-func New(version string) func() provider.Provider {
-	return func() provider.Provider {
-		return &ansibleformsProvider{
-			version: version,
-		}
-	}
-}
-
-// ansibleformsProvider is the provider implementation.
-type ansibleformsProvider struct {
+// AnsibleFormsProvider is the provider implementation.
+type AnsibleFormsProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
 }
 
-// ansibleformsProviderModel maps provider schema data to a Go type.
-type ansibleformsProviderModel struct {
-	Host     types.String `tfsdk:"host"`
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
+// ConnectionProfileModel associate a connection profile with a name
+// TODO: augment address with hostname, ...
+type ConnectionProfileModel struct {
+	Name          types.String `tfsdk:"name"`
+	Hostname      types.String `tfsdk:"hostname"`
+	Username      types.String `tfsdk:"username"`
+	Password      types.String `tfsdk:"password"`
+	ValidateCerts types.Bool   `tfsdk:"validate_certs"`
+}
+
+// AnsibleFormsProviderModel describes the provider data model.
+type AnsibleFormsProviderModel struct {
+	Endpoint             types.String             `tfsdk:"endpoint"`
+	JobCompletionTimeOut types.Int64              `tfsdk:"job_completion_timeout"`
+	ConnectionProfiles   []ConnectionProfileModel `tfsdk:"connection_profiles"`
 }
 
 // Metadata returns the provider type name.
-func (p *ansibleformsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "ansibleforms"
+func (p *AnsibleFormsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "ansible-forms"
 	resp.Version = p.version
 }
 
 // Schema defines the provider-level schema for configuration data.
-func (p *ansibleformsProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *AnsibleFormsProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Interact with AnsibleForms.",
 		Attributes: map[string]schema.Attribute{
-			"host": schema.StringAttribute{
-				Description: "URI for AnsibleForms API. May also be provided via ANSIBLEFORMS_HOST environment variable.",
-				Optional:    true,
+			"endpoint": schema.StringAttribute{
+				MarkdownDescription: "Example provider attribute",
+				Optional:            true,
 			},
-			"username": schema.StringAttribute{
-				Description: "Username for AnsibleForms API. May also be provided via ANSIBLEFORMS_USERNAME environment variable.",
-				Optional:    true,
+			"job_completion_timeout": schema.Int64Attribute{
+				MarkdownDescription: "Time in seconds to wait for completion. Default to 600 seconds",
+				Optional:            true,
 			},
-			"password": schema.StringAttribute{
-				Description: "Password for AnsibleForms API. May also be provided via ANSIBLEFORMS_PASSWORD environment variable.",
-				Optional:    true,
-				Sensitive:   true,
+			"connection_profiles": schema.ListNestedAttribute{
+				MarkdownDescription: "Define connection and credentials",
+				Required:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							MarkdownDescription: "Profile name",
+							Required:            true,
+						},
+						"hostname": schema.StringAttribute{
+							MarkdownDescription: "Ansible Forms management interface IP address or name",
+							Required:            true,
+						},
+						"username": schema.StringAttribute{
+							MarkdownDescription: "Ansible Forms management user name (cluster or svm)",
+							Required:            true,
+						},
+						"password": schema.StringAttribute{
+							MarkdownDescription: "Ansible Forms management password for username",
+							Required:            true,
+							Sensitive:           true,
+						},
+						"validate_certs": schema.BoolAttribute{
+							MarkdownDescription: "Whether to enforce SSL certificate validation, defaults to true",
+							Optional:            true,
+						},
+					},
+				},
 			},
 		},
 	}
 }
 
-func (p *ansibleformsProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	tflog.Info(ctx, "Configuring AnsibleForms client")
+func (p *AnsibleFormsProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var data AnsibleFormsProviderModel
 
-	// Retrieve provider data from configuration
-	var config ansibleformsProviderModel
-	diags := req.Config.Get(ctx, &config)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, fmt.Sprintf("unable to read data from req: %#v", req))
 		return
 	}
-
-	// If practitioner provided a configuration value for any of the
-	// attributes, it must be a known value.
-
-	if config.Host.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
-			"Unknown AnsibleForms API Host",
-			"The provider cannot create the AnsibleForms API client as there is an unknown configuration value for the AnsibleForms API host. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the ANSIBLEFORMS_HOST environment variable.",
-		)
-	}
-
-	if config.Username.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Unknown AnsibleForms API Username",
-			"The provider cannot create the AnsibleForms API client as there is an unknown configuration value for the AnsibleForms API username. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the ANSIBLEFORMS_USERNAME environment variable.",
-		)
-	}
-
-	if config.Password.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
-			"Unknown AnsibleForms API Password",
-			"The provider cannot create the AnsibleForms API client as there is an unknown configuration value for the AnsibleForms API password. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the ANSIBLEFORMS_PASSWORD environment variable.",
-		)
-	}
-
-	if resp.Diagnostics.HasError() {
+	// Required attributes
+	// For optional values we can use data.Endpoint.IsNull(), ...
+	if len(data.ConnectionProfiles) == 0 {
+		resp.Diagnostics.AddError("no connection profile", "At least one connection profile must be defined.")
 		return
 	}
-
-	// Default values to environment variables, but override
-	// with Terraform configuration value if set.
-
-	host := os.Getenv("ANSIBLEFORMS_HOST")
-	username := os.Getenv("ANSIBLEFORMS_USERNAME")
-	password := os.Getenv("ANSIBLEFORMS_PASSWORD")
-
-	if !config.Host.IsNull() {
-		host = config.Host.ValueString()
+	connectionProfiles := make(map[string]ConnectionProfile, len(data.ConnectionProfiles))
+	for _, profile := range data.ConnectionProfiles {
+		var validateCerts bool
+		if profile.ValidateCerts.IsNull() {
+			validateCerts = true
+		} else {
+			validateCerts = profile.ValidateCerts.ValueBool()
+		}
+		connectionProfiles[profile.Name.ValueString()] = ConnectionProfile{
+			Hostname:              profile.Hostname.ValueString(),
+			Username:              profile.Username.ValueString(),
+			Password:              profile.Password.ValueString(),
+			ValidateCerts:         validateCerts,
+			MaxConcurrentRequests: 0,
+		}
 	}
-
-	if !config.Username.IsNull() {
-		username = config.Username.ValueString()
+	jobCompletionTimeOut := data.JobCompletionTimeOut.ValueInt64()
+	if data.JobCompletionTimeOut.IsNull() {
+		jobCompletionTimeOut = 600
 	}
-
-	if !config.Password.IsNull() {
-		password = config.Password.ValueString()
+	config := Config{
+		ConnectionProfiles:   connectionProfiles,
+		JobCompletionTimeOut: int(jobCompletionTimeOut),
+		Version:              p.version,
 	}
-
-	// If any of the expected configurations are missing, return
-	// errors with provider-specific guidance.
-
-	if host == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
-			"Missing AnsibleForms API Host",
-			"The provider cannot create the AnsibleForms API client as there is a missing or empty value for the AnsibleForms API host. "+
-				"Set the host value in the configuration or use the ANSIBLEFORMS_HOST environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if username == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Missing AnsibleForms API Username",
-			"The provider cannot create the AnsibleForms API client as there is a missing or empty value for the AnsibleForms API username. "+
-				"Set the username value in the configuration or use the ANSIBLEFORMS_USERNAME environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if password == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
-			"Missing AnsibleForms API Password",
-			"The provider cannot create the AnsibleForms API client as there is a missing or empty value for the AnsibleForms API password. "+
-				"Set the password value in the configuration or use the ANSIBLEFORMS_PASSWORD environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	ctx = tflog.SetField(ctx, "ansibleforms_host", host)
-	ctx = tflog.SetField(ctx, "ansibleforms_username", username)
-	ctx = tflog.SetField(ctx, "ansibleforms_password", password)
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "ansibleforms_password")
-
-	tflog.Debug(ctx, "Creating AnsibleForms client")
-
-	// Create a new AnsibleForms client using the configuration values
-	client, err := ansibleformsNewClient(ctx, &host, &username, &password)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Create AnsibleForms API Client",
-			"An unexpected error occurred when creating the AnsibleForms API client. "+
-				"If the error is not clear, please contact the provider developers.\n\n"+
-				"AnsibleForms Client Error: "+err.Error(),
-		)
-		return
-	}
-
-	// Make the AnsibleForms client available during DataSource and Resource
-	// type Configure methods.
-	resp.DataSourceData = client
-	resp.ResourceData = client
-
-	tflog.Info(ctx, "Configured AnsibleForms client", map[string]any{"success": true})
-
-}
-
-// DataSources defines the data sources implemented in the provider.
-func (p *ansibleformsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return nil
+	resp.DataSourceData = config
+	resp.ResourceData = config
 }
 
 // Resources defines the resources implemented in the provider.
-func (p *ansibleformsProvider) Resources(_ context.Context) []func() resource.Resource {
+func (p *AnsibleFormsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewJobResource,
+	}
+}
+
+// DataSources defines the data sources implemented in the provider.
+func (p *AnsibleFormsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{
+		NewJobDataSource,
+	}
+}
+
+// New creates a provider instance.
+func New(version string) func() provider.Provider {
+	return func() provider.Provider {
+		return &AnsibleFormsProvider{
+			version: version,
+		}
 	}
 }

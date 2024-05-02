@@ -1,4 +1,4 @@
-module terraform-provider-ansibleforms
+module terraform-provider-ansible-forms
 
 go 1.20
 

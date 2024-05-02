@@ -1,9 +1,9 @@
 terraform {
   required_providers {
     ansibleforms = {
-      source = "hashicorp.com/se/ansibleforms"
+      source = "hashicorp.com/se/ansible-forms"
     }
   }
 }
 
-provider "ansibleforms" {}
+provider "ansible-forms" {}
