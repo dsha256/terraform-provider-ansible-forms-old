@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
-	"terraform-provider-ansibleforms/internal/interfaces"
-	"terraform-provider-ansibleforms/internal/utils"
+	"terraform-provider-ansible-forms/internal/interfaces"
+	"terraform-provider-ansible-forms/internal/utils"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -207,45 +207,8 @@ func (r *JobResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		errorHandler.MakeAndReportError("No Svm found", "No SVM found")
 	}
 
-	//data.FormName = types.StringValue(job.Form)
-	//data.ID = types.Int64Value(job.Id.ValueInt64())
-
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-	//
-	//
-	//
-	//
-	//
-
-	//// Get current state
-	//var state JobResourceModel
-	//diags := req.State.Get(ctx, &state)
-	//resp.Diagnostics.Append(diags...)
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
-	//
-	//// Get refreshed job value from AnsibleForms
-	//job, err := r.client.GetJob(ctx, state.ID.ValueString())
-	//if err != nil {
-	//	resp.Diagnostics.AddError(
-	//		"Error Reading AnsibleForms Job",
-	//		"Could not read AnsibleForms job ID "+state.ID.ValueString()+": "+err.Error(),
-	//	)
-	//	return
-	//}
-	//
-	//// Overwrite items with refreshed state
-	//state.FormName = types.StringValue(job.Data.Form)
-	//state.Status = types.StringValue(job.Status)
-	//
-	//// Set refreshed state
-	//diags = resp.State.Set(ctx, &state)
-	//resp.Diagnostics.Append(diags...)
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 }
 
 // Update updates the resource and sets the updated Terraform state on success.

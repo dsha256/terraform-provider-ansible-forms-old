@@ -6,8 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 
-	"terraform-provider-ansibleforms/internal/restclient"
-	"terraform-provider-ansibleforms/internal/utils"
+	"terraform-provider-ansible-forms/internal/restclient"
+	"terraform-provider-ansible-forms/internal/utils"
 )
 
 // JobGetDataSourceModel describes the data source model.

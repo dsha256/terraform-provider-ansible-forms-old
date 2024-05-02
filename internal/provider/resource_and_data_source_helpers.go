@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"terraform-provider-ansibleforms/internal/restclient"
-	"terraform-provider-ansibleforms/internal/utils"
+	"terraform-provider-ansible-forms/internal/restclient"
+	"terraform-provider-ansible-forms/internal/utils"
 )
 
 type resourceOrDataSourceConfig struct {

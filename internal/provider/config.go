@@ -8,8 +8,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/exp/maps"
 
-	"terraform-provider-ansibleforms/internal/restclient"
-	"terraform-provider-ansibleforms/internal/utils"
+	"terraform-provider-ansible-forms/internal/restclient"
+	"terraform-provider-ansible-forms/internal/utils"
 )
 
 // ConnectionProfile describes how to reach a cluster or svm

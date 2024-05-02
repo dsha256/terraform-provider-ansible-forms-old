@@ -47,7 +47,7 @@ type AnsibleFormsProviderModel struct {
 
 // Metadata returns the provider type name.
 func (p *AnsibleFormsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "ansibleforms"
+	resp.TypeName = "ansible-forms"
 	resp.Version = p.version
 }
 

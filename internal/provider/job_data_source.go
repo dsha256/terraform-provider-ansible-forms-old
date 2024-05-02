@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
-	"terraform-provider-ansibleforms/internal/interfaces"
-	"terraform-provider-ansibleforms/internal/utils"
+	"terraform-provider-ansible-forms/internal/interfaces"
+	"terraform-provider-ansible-forms/internal/utils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,7 +43,7 @@ type JobDataSourceModel struct {
 
 // Metadata returns the data source type name.
 func (d *JobDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = "ansibleforms_job"
+	resp.TypeName = req.ProviderTypeName + "_" + d.config.name
 }
 
 // Schema defines the schema for the data source.

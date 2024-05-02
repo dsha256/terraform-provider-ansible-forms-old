@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 
-	"terraform-provider-ansibleforms/internal/restclient/httpclient"
+	"terraform-provider-ansible-forms/internal/restclient/httpclient"
 )
 
 // ConnectionProfile describes out to reach a cluster or svm
