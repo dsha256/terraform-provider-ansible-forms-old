@@ -73,15 +73,15 @@ func (p *AnsibleFormsProvider) Schema(_ context.Context, _ provider.SchemaReques
 							Required:            true,
 						},
 						"hostname": schema.StringAttribute{
-							MarkdownDescription: "ONTAP management interface IP address or name",
+							MarkdownDescription: "Ansible Forms management interface IP address or name",
 							Required:            true,
 						},
 						"username": schema.StringAttribute{
-							MarkdownDescription: "ONTAP management user name (cluster or svm)",
+							MarkdownDescription: "Ansible Forms management user name (cluster or svm)",
 							Required:            true,
 						},
 						"password": schema.StringAttribute{
-							MarkdownDescription: "ONTAP management password for username",
+							MarkdownDescription: "Ansible Forms management password for username",
 							Required:            true,
 							Sensitive:           true,
 						},

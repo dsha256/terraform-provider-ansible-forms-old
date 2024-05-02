@@ -36,16 +36,21 @@ type JobDataSourceModel struct {
 	Id            types.Int64  `tfsdk:"id"`
 	LastUpdated   types.String `tfsdk:"last_updated"`
 	FormName      types.String `tfsdk:"form_name"`
+	Status        types.String `tfsdk:"status"`
+	Extravars     types.Map    `tfsdk:"extravars"`
+	Credentials   types.Map    `tfsdk:"credentials"`
 }
 
+// Metadata returns the data source type name.
 func (d *JobDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = "ansibleforms_job"
 }
 
+// Schema defines the schema for the data source.
 func (d *JobDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Job resource",
+		MarkdownDescription: "Job Data Source",
 
 		Attributes: map[string]schema.Attribute{
 			"cx_profile_name": schema.StringAttribute{
@@ -53,14 +58,30 @@ func (d *JobDataSource) Schema(ctx context.Context, req datasource.SchemaRequest
 				Required:            true,
 			},
 			"id": schema.Int64Attribute{
-				Required: true,
+				MarkdownDescription: "",
+				Required:            true,
 			},
 			"last_updated": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: "",
+				Computed:            true,
 			},
 			"form_name": schema.StringAttribute{
 				Description: "Form Name.",
 				Computed:    true,
+			},
+			"status": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
+			"extravars": schema.MapAttribute{
+				MarkdownDescription: "",
+				ElementType:         types.StringType,
+				Computed:            true,
+			},
+			"credentials": schema.MapAttribute{
+				MarkdownDescription: "",
+				ElementType:         types.StringType,
+				Computed:            true,
 			},
 		},
 	}
@@ -82,6 +103,7 @@ func (d *JobDataSource) Configure(ctx context.Context, req datasource.ConfigureR
 	d.config.providerConfig = config
 }
 
+// Read refreshes the Terraform state with the latest data.
 func (d *JobDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data JobDataSourceModel
 
@@ -105,13 +127,12 @@ func (d *JobDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 		// error reporting done inside GetSVMPeer
 		return
 	}
-	tflog.Debug(ctx, "<<<<<<<<<<<<<<<< REST RESPONSE >>>>>>>>>>>>>>>>>", map[string]interface{}{
-		"INFO": restInfo,
-	})
 
+	data.Id = types.Int64Value(restInfo.Data.ID)
 	data.FormName = types.StringValue(restInfo.Data.Form)
-
-	//data.ID = types.Int64Value(restInfo.Id.ValueInt64())
+	data.Status = types.StringValue(restInfo.Data.Status)
+	data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Extravars)
+	data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Credentials)
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log
