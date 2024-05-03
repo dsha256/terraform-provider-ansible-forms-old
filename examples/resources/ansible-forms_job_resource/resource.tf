@@ -1,6 +1,8 @@
-resource "ansibleforms_job" "se" {
-  form_name = "AXA Share Create"
+resource "ansible-forms_job_resource" "job" {
+  cx_profile_name = "cluster1"
+  form_name       = "Demo Form Ansible No input"
   extravars = {
+    name                = "github.com/dsha256"
     region              = "myregion"
     opco                = "myopco"
     svm_name            = "mysvm_name"
@@ -18,6 +20,6 @@ resource "ansibleforms_job" "se" {
   }
 }
 
-output "ansibleforms_job" {
-  value = ansibleforms_job.se
+output "ansible-forms_job_resource" {
+  value = ansible-forms_job_resource.job
 }
