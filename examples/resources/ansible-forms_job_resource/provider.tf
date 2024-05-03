@@ -1,13 +1,13 @@
 terraform {
   required_providers {
     ansibleforms = {
-      source = "hashicorp.com/se/ansibleforms"
+      source = "hashicorp.com/se/ansible-forms"
     }
   }
   required_version = ">= 0.0.1"
 }
 
-provider "ansibleforms" {
+provider "ansible-forms" {
   connection_profiles = [
     {
       name = "cluster1"

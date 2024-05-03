@@ -10,30 +10,55 @@ import (
 	"terraform-provider-ansible-forms/internal/utils"
 )
 
+// JobResourceModel describes the resource data model.
+type JobResourceModel struct {
+	ID int64 `mapstructure:"id"`
+
+	Start    string `mapstructure:"start"`
+	End      string `mapstructure:"end"`
+	User     string `mapstructure:"user"`
+	UserType string `mapstructure:"user_type"`
+	JobType  string `mapstructure:"job_type"`
+
+	Extravars   map[string]any `mapstructure:"extravars"`
+	Credentials map[string]any `mapstructure:"credentials"`
+	Form        string         `mapstructure:"formName"`
+	Status      string         `mapstructure:"status"`
+	Message     string         `mapstructure:"message"`
+
+	//Target      string         `mapstructure:"target"`
+	//NoOfRecords int64          `mapstructure:"no_of_records"`
+	//Counter     int64          `mapstructure:"counter"`
+	Output string `mapstructure:"output"`
+	Data   string `mapstructure:"data"`
+}
+
+type Data struct {
+	ID            int64  `mapstructure:"id"`
+	Form          string `mapstructure:"form"`
+	Target        string `mapstructure:"target"`
+	Status        string `mapstructure:"status"`
+	Start         string `mapstructure:"start"`
+	End           string `mapstructure:"end"`
+	User          string `mapstructure:"user"`
+	UserType      string `mapstructure:"user_type"`
+	JobType       string `mapstructure:"job_type"`
+	Extravars     string `mapstructure:"extravars"`
+	Credentials   string `mapstructure:"credentials"`
+	Notifications string `mapstructure:"notifications"`
+	NoOfRecords   int64  `mapstructure:"no_of_records"`
+	Counter       int64  `mapstructure:"counter"`
+	Output        string `mapstructure:"output"`
+}
+
 // JobGetDataSourceModel describes the data source model.
 type JobGetDataSourceModel struct {
 	Status  string `mapstructure:"status"`
 	Message string `mapstructure:"message"`
-	Data    struct {
-		ID            int64  `mapstructure:"id"`
-		Form          string `mapstructure:"form"`
-		Target        string `mapstructure:"target"`
-		Status        string `mapstructure:"status"`
-		Start         string `mapstructure:"start"`
-		End           string `mapstructure:"end"`
-		User          string `mapstructure:"user"`
-		UserType      string `mapstructure:"user_type"`
-		JobType       string `mapstructure:"job_type"`
-		Extravars     string `mapstructure:"extravars"`
-		Credentials   string `mapstructure:"credentials"`
-		Notifications string `mapstructure:"notifications"`
-		NoOfRecords   int64  `mapstructure:"no_of_records"`
-		Counter       int64  `mapstructure:"counter"`
-		Output        string `mapstructure:"output"`
-	} `mapstructure:"data"`
+	Data    Data   `mapstructure:"data"`
 }
 
-// GetJobById ...
+// GetJobById gets job info by id.
 func GetJobById(errorHandler *utils.ErrorHandler, r restclient.RestClient, id string) (*JobGetDataSourceModel, error) {
 	statusCode, response, err := r.GetNilOrOneRecord("job/"+id, nil, nil)
 	if err != nil {
@@ -47,4 +72,35 @@ func GetJobById(errorHandler *utils.ErrorHandler, r restclient.RestClient, id st
 	tflog.Debug(errorHandler.Ctx, fmt.Sprintf("read job info: %#v", apiResp.Data))
 
 	return apiResp, nil
+}
+
+func CreateJob(errorHandler *utils.ErrorHandler, r restclient.RestClient, data JobResourceModel) (*JobGetDataSourceModel, error) {
+	var body map[string]interface{}
+	if err := mapstructure.Decode(data, &body); err != nil {
+		return nil, errorHandler.MakeAndReportError("error encoding job body", fmt.Sprintf("error on encoding POST job/ body: %s, body: %#v", err, data))
+	}
+
+	statusCode, response, err := r.CallCreateMethod("job/", nil, body) // Ansible Forms API does not allow querying.
+	if err != nil {
+		return nil, errorHandler.MakeAndReportError("error creating job", fmt.Sprintf("error on POST job/: %s, statusCode %d", err, statusCode))
+	}
+
+	var resp *CreateJobResponse
+	if err = mapstructure.Decode(response.Records[0], &resp); err != nil {
+		return nil, errorHandler.MakeAndReportError("failed to decode response from POST job/", fmt.Sprintf("error: %s, statusCode %d, response %#v", err, statusCode, response))
+	}
+	tflog.Debug(errorHandler.Ctx, fmt.Sprintf("Create svm source - udata: %#v", resp))
+
+	return &JobGetDataSourceModel{Data: Data{ID: resp.Data.Output.Id, Status: resp.Status}}, nil
+}
+
+type CreateJobResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Data    struct {
+		Output struct {
+			Id int64 `json:"id"`
+		} `json:"output"`
+		Error string `json:"error"`
+	} `json:"data"`
 }
