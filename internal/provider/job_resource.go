@@ -191,18 +191,23 @@ func (r *JobResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 	}
 
 	if job == nil {
-		errorHandler.MakeAndReportError("No Job found", "No JOB found")
-	}
-
-	restInfo, err := interfaces.GetJobById(errorHandler, *client, data.ID.String())
-	if err != nil {
-		// error reporting done inside GetSVMPeer
 		return
 	}
 
-	data.ID = types.StringValue(strconv.FormatInt(restInfo.Data.ID, 10))
-	data.FormName = types.StringValue(restInfo.Data.Form)
-	data.Status = types.StringValue(restInfo.Data.Status)
+	//if  job.Data.Status == "" {
+	//	data.Status = types.StringValue(job.Data.Status)
+	//}
+
+	data.ID = types.StringValue(strconv.FormatInt(job.Data.ID, 10))
+
+	if job.Data.Form != "" {
+		data.FormName = types.StringValue(job.Data.Form)
+	}
+
+	if job.Data.Status != "" {
+		data.Status = types.StringValue(job.Status)
+	}
+
 	//data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Extravars)
 	//data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Credentials)
 
