@@ -182,7 +182,7 @@ func (r *JobResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 
 	var job *interfaces.JobGetDataSourceModel
 	if data.ID.ValueString() != "" {
-		job, err = interfaces.GetJobById(errorHandler, *client, data.ID.ValueString())
+		job, err = interfaces.GetJobByID(errorHandler, *client, data.ID.ValueString())
 	} else {
 		return
 	}
@@ -194,22 +194,22 @@ func (r *JobResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		return
 	}
 
-	//if  job.Data.Status == "" {
-	//	data.Status = types.StringValue(job.Data.Status)
+	//if  job.JobGetDataSourceModel.Status == "" {
+	//	data.Status = types.StringValue(job.JobGetDataSourceModel.Status)
 	//}
 
-	data.ID = types.StringValue(strconv.FormatInt(job.Data.ID, 10))
+	data.ID = types.StringValue(strconv.FormatInt(job.ID, 10))
 
-	if job.Data.Form != "" {
-		data.FormName = types.StringValue(job.Data.Form)
+	if job.Form != "" {
+		data.FormName = types.StringValue(job.Form)
 	}
 
-	if job.Data.Status != "" {
+	if job.Status != "" {
 		data.Status = types.StringValue(job.Status)
 	}
 
-	//data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Extravars)
-	//data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Credentials)
+	//data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.JobGetDataSourceModel.Extravars)
+	//data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.JobGetDataSourceModel.Credentials)
 
 	//data.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 
