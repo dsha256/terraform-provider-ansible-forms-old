@@ -104,3 +104,12 @@ type CreateJobResponse struct {
 		Error string `json:"error"`
 	} `json:"data"`
 }
+
+func DeleteJobByID(errorHandler *utils.ErrorHandler, r restclient.RestClient, id string) error {
+	statusCode, _, err := r.CallDeleteMethod("job/"+id, nil, nil)
+	if err != nil {
+		return errorHandler.MakeAndReportError("error deleting job info", fmt.Sprintf("error on DELETE job/: %s, statusCode %d", err, statusCode))
+	}
+
+	return nil
+}

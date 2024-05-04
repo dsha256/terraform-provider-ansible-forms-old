@@ -227,4 +227,27 @@ func (r *JobResource) Update(ctx context.Context, req resource.UpdateRequest, re
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *JobResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *JobResourceModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	errorHandler := utils.NewErrorHandler(ctx, &resp.Diagnostics)
+	if data.ID.IsNull() {
+		errorHandler.MakeAndReportError("ID is null", "job ID is null")
+		return
+	}
+
+	client, err := getRestClient(errorHandler, r.config, data.CxProfileName)
+	if err != nil {
+		// error reporting done inside NewClient
+		return
+	}
+	err = interfaces.DeleteJobByID(errorHandler, *client, data.ID.ValueString())
+	if err != nil {
+		return
+	}
 }
