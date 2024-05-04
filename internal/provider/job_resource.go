@@ -76,82 +76,92 @@ func (r *JobResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 
 		Attributes: map[string]schema.Attribute{
 			"cx_profile_name": schema.StringAttribute{
-				MarkdownDescription: "Connection profile name",
 				Required:            true,
+				MarkdownDescription: "Connection profile name.",
 			},
 			"form_name": schema.StringAttribute{
-				Description: "Form Name.",
-				Required:    true,
+				Required:            true,
+				MarkdownDescription: "Form name of a job.",
 			},
 			"extravars": schema.MapAttribute{
-				Description: "Extra Vars.",
-				Required:    true,
-				ElementType: types.StringType,
+				Required:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Extra vars of a job.",
 			},
 			"credentials": schema.MapAttribute{
-				Description: "Extra Vars.",
-				Required:    true,
-				ElementType: types.StringType,
+				Required:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Credentials of a job.",
 			},
 			"id": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "ID of a job.",
 			},
 			"last_updated": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Last update time of a job.",
 			},
 			"status": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Status of a job.",
 			},
 			"target": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Target form of a job.",
 			},
 			"output": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Output of a job.",
 			},
 			"counter": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Counter of a job.",
 			},
 			"no_of_records": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Number of records of a job.",
 			},
 			"start": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Start time of a job.",
 			},
 			"end": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "End time of a job.",
 			},
 			"approval": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "Approval of a job.",
 			},
 		},
 	}
