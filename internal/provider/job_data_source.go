@@ -33,7 +33,7 @@ func NewJobDataSource() datasource.DataSource {
 // JobDataSourceModel maps the resource schema data.
 type JobDataSourceModel struct {
 	CxProfileName types.String `tfsdk:"cx_profile_name"`
-	Id            types.Int64  `tfsdk:"id"`
+	ID            types.Int64  `tfsdk:"id"`
 	LastUpdated   types.String `tfsdk:"last_updated"`
 	FormName      types.String `tfsdk:"form_name"`
 	Status        types.String `tfsdk:"status"`
@@ -50,7 +50,7 @@ func (d *JobDataSource) Metadata(ctx context.Context, req datasource.MetadataReq
 func (d *JobDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Job Data Source",
+		MarkdownDescription: "Job JobGetDataSourceModel Source",
 
 		Attributes: map[string]schema.Attribute{
 			"cx_profile_name": schema.StringAttribute{
@@ -96,7 +96,7 @@ func (d *JobDataSource) Configure(ctx context.Context, req datasource.ConfigureR
 	config, ok := req.ProviderData.(Config)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected JobGetDataSourceModel Source Configure Type",
 			fmt.Sprintf("Expected Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 	}
@@ -122,17 +122,17 @@ func (d *JobDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 		return
 	}
 
-	restInfo, err := interfaces.GetJobById(errorHandler, *client, data.Id.String())
+	restInfo, err := interfaces.GetJobByID(errorHandler, *client, data.ID.String())
 	if err != nil {
 		// error reporting done inside GetSVMPeer
 		return
 	}
 
-	data.Id = types.Int64Value(restInfo.Data.ID)
-	data.FormName = types.StringValue(restInfo.Data.Form)
-	data.Status = types.StringValue(restInfo.Data.Status)
-	data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Extravars)
-	data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Data.Credentials)
+	data.ID = types.Int64Value(restInfo.ID)
+	data.FormName = types.StringValue(restInfo.Form)
+	data.Status = types.StringValue(restInfo.Status)
+	data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Extravars)
+	data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Credentials)
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log

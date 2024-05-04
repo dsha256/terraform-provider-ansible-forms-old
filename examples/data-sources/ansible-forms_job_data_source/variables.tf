@@ -3,11 +3,11 @@ variable "username" {
   type = string
 }
 variable "password" {
-  type = string
+  type      = string
   sensitive = true
 }
 variable "hostname" {
-  type = string
+  type      = string
   sensitive = true
 }
 variable "validate_certs" {
