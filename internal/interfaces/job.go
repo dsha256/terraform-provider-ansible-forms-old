@@ -12,25 +12,23 @@ import (
 
 // JobResourceModel describes the resource data model.
 type JobResourceModel struct {
-	ID int64 `mapstructure:"id"`
-
-	Start    string `mapstructure:"start"`
-	End      string `mapstructure:"end"`
-	User     string `mapstructure:"user"`
-	UserType string `mapstructure:"user_type"`
-	JobType  string `mapstructure:"job_type"`
-
+	ID          int64          `mapstructure:"id"`
+	Start       string         `mapstructure:"start"`
+	End         string         `mapstructure:"end"`
+	User        string         `mapstructure:"user"`
+	UserType    string         `mapstructure:"user_type"`
+	JobType     string         `mapstructure:"job_type"`
 	Extravars   map[string]any `mapstructure:"extravars"`
 	Credentials map[string]any `mapstructure:"credentials"`
 	Form        string         `mapstructure:"formName"`
 	Status      string         `mapstructure:"status"`
 	Message     string         `mapstructure:"message"`
-
-	//Target      string         `mapstructure:"target"`
-	//NoOfRecords int64          `mapstructure:"no_of_records"`
-	//Counter     int64          `mapstructure:"counter"`
-	Output string `mapstructure:"output"`
-	Data   string `mapstructure:"data"`
+	Target      string         `mapstructure:"target"`
+	NoOfRecords int64          `mapstructure:"no_of_records"`
+	Counter     int64          `mapstructure:"counter"`
+	Output      string         `mapstructure:"output"`
+	Data        string         `mapstructure:"data"`
+	Approval    string         `mapstructure:"approval"`
 }
 
 type JobGetDataSourceModel struct {
@@ -49,6 +47,7 @@ type JobGetDataSourceModel struct {
 	NoOfRecords   int64  `mapstructure:"no_of_records"`
 	Counter       int64  `mapstructure:"counter"`
 	Output        string `mapstructure:"output"`
+	Approval      string `mapstructure:"approval"`
 }
 
 // GetJobResponse describes GET job response.
@@ -56,6 +55,17 @@ type GetJobResponse struct {
 	Status  string                `mapstructure:"status"`
 	Message string                `mapstructure:"message"`
 	Data    JobGetDataSourceModel `mapstructure:"data"`
+}
+
+type CreateJobResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Data    struct {
+		Output struct {
+			Id int64 `json:"id"`
+		} `json:"output"`
+		Error string `json:"error"`
+	} `json:"data"`
 }
 
 // GetJobByID gets job info by id.
@@ -74,6 +84,7 @@ func GetJobByID(errorHandler *utils.ErrorHandler, r restclient.RestClient, id st
 	return &apiResp.Data, nil
 }
 
+// CreateJob creates a job.
 func CreateJob(errorHandler *utils.ErrorHandler, r restclient.RestClient, data JobResourceModel) (*GetJobResponse, error) {
 	var body map[string]interface{}
 	if err := mapstructure.Decode(data, &body); err != nil {
@@ -94,17 +105,7 @@ func CreateJob(errorHandler *utils.ErrorHandler, r restclient.RestClient, data J
 	return &GetJobResponse{Data: JobGetDataSourceModel{ID: resp.Data.Output.Id, Status: resp.Status}}, nil
 }
 
-type CreateJobResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Data    struct {
-		Output struct {
-			Id int64 `json:"id"`
-		} `json:"output"`
-		Error string `json:"error"`
-	} `json:"data"`
-}
-
+// DeleteJobByID deletes a job by ID.
 func DeleteJobByID(errorHandler *utils.ErrorHandler, r restclient.RestClient, id string) error {
 	statusCode, _, err := r.CallDeleteMethod("job/"+id, nil, nil)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -47,6 +48,13 @@ type JobResourceModel struct {
 	Status        types.String `tfsdk:"status"`
 	Extravars     types.Map    `tfsdk:"extravars"`
 	Credentials   types.Map    `tfsdk:"credentials"`
+	Target        types.String `tfsdk:"target"`
+	Output        types.String `tfsdk:"output"`
+	Counter       types.Int64  `tfsdk:"counter"`
+	NoOfRecords   types.Int64  `tfsdk:"no_of_records"`
+	Start         types.String `tfsdk:"start"`
+	End           types.String `tfsdk:"end"`
+	Approval      types.String `tfsdk:"approval"`
 }
 
 // JobResourceModelCredentials ...
@@ -103,6 +111,48 @@ func (r *JobResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"target": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"output": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"counter": schema.Int64Attribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"no_of_records": schema.Int64Attribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"start": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"end": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"approval": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 		},
 	}
 }
@@ -154,6 +204,13 @@ func (r *JobResource) Create(ctx context.Context, req resource.CreateRequest, re
 	data.ID = types.StringValue(strconv.FormatInt(job.Data.ID, 10))
 	data.Status = types.StringValue(job.Data.Status)
 	data.LastUpdated = types.StringValue(time.Now().UTC().Format(time.RFC3339))
+	data.Target = types.StringValue(job.Data.Target)
+	data.Output = types.StringValue(job.Data.Output)
+	data.Counter = types.Int64Value(job.Data.Counter)
+	data.NoOfRecords = types.Int64Value(job.Data.NoOfRecords)
+	data.Start = types.StringValue(job.Data.Start)
+	data.End = types.StringValue(job.Data.End)
+	data.Approval = types.StringValue(job.Data.Approval)
 
 	tflog.Debug(ctx, "JOB ID", map[string]interface{}{"ID": job.Data.ID, "DATA": data})
 
@@ -194,24 +251,37 @@ func (r *JobResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		return
 	}
 
-	//if  job.JobGetDataSourceModel.Status == "" {
-	//	data.Status = types.StringValue(job.JobGetDataSourceModel.Status)
-	//}
-
 	data.ID = types.StringValue(strconv.FormatInt(job.ID, 10))
 
 	if job.Form != "" {
 		data.FormName = types.StringValue(job.Form)
 	}
-
 	if job.Status != "" {
 		data.Status = types.StringValue(job.Status)
 	}
-
 	//data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.JobGetDataSourceModel.Extravars)
 	//data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.JobGetDataSourceModel.Credentials)
-
-	//data.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+	if job.Output != "" {
+		data.Output = types.StringValue(job.Output)
+	}
+	if job.Counter != 0 {
+		data.Counter = types.Int64Value(job.Counter)
+	}
+	if job.NoOfRecords != 0 {
+		data.NoOfRecords = types.Int64Value(job.NoOfRecords)
+	}
+	if job.Target != "" {
+		data.Target = types.StringValue(job.Target)
+	}
+	if job.Start != "" {
+		data.Start = types.StringValue(job.Start)
+	}
+	if job.End != "" {
+		data.End = types.StringValue(job.End)
+	}
+	if job.Approval != "" {
+		data.Approval = types.StringValue(job.Approval)
+	}
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log
