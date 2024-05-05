@@ -31,6 +31,7 @@ type JobResourceModel struct {
 	Approval    string         `mapstructure:"approval"`
 }
 
+// JobGetDataSourceModel ...
 type JobGetDataSourceModel struct {
 	ID          int64  `mapstructure:"id"`
 	Start       string `mapstructure:"start"`
@@ -58,12 +59,13 @@ type GetJobResponse struct {
 	Data    JobGetDataSourceModel `mapstructure:"data"`
 }
 
+// CreateJobResponse ...
 type CreateJobResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 	Data    struct {
 		Output struct {
-			Id int64 `json:"id"`
+			ID int64 `json:"id"`
 		} `json:"output"`
 		Error string `json:"error"`
 	} `json:"data"`
@@ -105,7 +107,7 @@ func CreateJob(errorHandler *utils.ErrorHandler, r restclient.RestClient, data J
 	}
 	tflog.Debug(errorHandler.Ctx, fmt.Sprintf("Create svm source - udata: %#v", resp))
 
-	return &GetJobResponse{Data: JobGetDataSourceModel{ID: resp.Data.Output.Id, Status: resp.Status}}, nil
+	return &GetJobResponse{Data: JobGetDataSourceModel{ID: resp.Data.Output.ID, Status: resp.Status}}, nil
 }
 
 // DeleteJobByID deletes a job by ID.

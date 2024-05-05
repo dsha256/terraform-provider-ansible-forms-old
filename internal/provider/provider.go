@@ -96,6 +96,7 @@ func (p *AnsibleFormsProvider) Schema(_ context.Context, _ provider.SchemaReques
 	}
 }
 
+// Configure shared clients for data source and resource implementations.
 func (p *AnsibleFormsProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	var data AnsibleFormsProviderModel
 
