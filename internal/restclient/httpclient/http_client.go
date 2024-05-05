@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/slog"
 )
 
 // HTTPClient represents a client for interaction with an Ansible Forms REST API
@@ -64,7 +65,12 @@ func (c *HTTPClient) Do(baseURL string, req *Request) (int, []byte, error) {
 		return statusCode, nil, err
 	}
 
-	defer httpRes.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			slog.Error("error closing body", err)
+		}
+	}(httpRes.Body)
 
 	body, err := io.ReadAll(httpRes.Body)
 	if err != nil {
