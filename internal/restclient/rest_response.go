@@ -18,13 +18,13 @@ type RestError struct {
 // RestResponse to return a list of records (can be empty) and/or errors.
 type RestResponse struct {
 	NumRecords int `mapstructure:"num_records"`
-	Records    []map[string]interface{}
+	Records    []map[string]any
 	RestError  RestError `mapstructure:"error"`
 	StatusCode int
 	HTTPError  string
 	ErrorType  string
-	Job        map[string]interface{}
-	Jobs       []map[string]interface{}
+	Job        map[string]any
+	Jobs       []map[string]any
 }
 
 // unmarshalResponse converts the REST response into a structure with a list of 0 or more records.
@@ -34,7 +34,7 @@ type RestResponse struct {
 func (r *RestClient) unmarshalResponse(statusCode int, responseJSON []byte, httpClientErr error) (int, RestResponse, error) {
 	emptyResponse := RestResponse{
 		NumRecords: 0,
-		Records:    []map[string]interface{}{},
+		Records:    []map[string]any{},
 		RestError:  RestError{},
 		StatusCode: statusCode,
 		HTTPError:  "",
@@ -46,8 +46,8 @@ func (r *RestClient) unmarshalResponse(statusCode int, responseJSON []byte, http
 		return statusCode, emptyResponse, httpClientErr
 	}
 
-	// We don't know which fields are present or not, and fields may not be in a record, so just use interface{}
-	var dataMap map[string]interface{}
+	// We don't know which fields are present or not, and fields may not be in a record, so just use any
+	var dataMap map[string]any
 	if err := json.Unmarshal(responseJSON, &dataMap); err != nil {
 		tflog.Error(r.ctx, fmt.Sprintf("unable to unmarshall response, this may be expected when statusCode %d >= 300, unmarshall error=%s, response=%#v", statusCode, err, responseJSON))
 		emptyResponse.ErrorType = "bad_response_decode_json"
@@ -59,11 +59,11 @@ func (r *RestClient) unmarshalResponse(statusCode int, responseJSON []byte, http
 	// If records is not present, the contents will show in Other.
 	type restStagedResponse struct {
 		NumRecords int `mapstructure:"num_records"`
-		Records    []map[string]interface{}
+		Records    []map[string]any
 		Error      RestError
-		Job        map[string]interface{}
-		Jobs       []map[string]interface{}
-		Other      map[string]interface{} `mapstructure:",remain"`
+		Job        map[string]any
+		Jobs       []map[string]any
+		Other      map[string]any `mapstructure:",remain"`
 	}
 
 	var rawResponse restStagedResponse
@@ -98,6 +98,7 @@ func (r *RestClient) unmarshalResponse(statusCode int, responseJSON []byte, http
 	finalResponse.StatusCode = statusCode
 	finalResponse, err := r.checkRestErrors(statusCode, finalResponse)
 	tflog.Debug(r.ctx, fmt.Sprintf("finalResponse %#v, metadata %#v", finalResponse, metadata))
+
 	return statusCode, finalResponse, err
 }
 
@@ -113,6 +114,7 @@ func (r *RestClient) checkRestErrors(statusCode int, response RestResponse) (Res
 	if err != nil {
 		tflog.Error(r.ctx, fmt.Sprintf("checkRestError: %s, statusCode %d, response: %#v", err, statusCode, response))
 	}
+
 	return response, err
 }
 
@@ -121,5 +123,6 @@ func (r *RestClient) checkStatusCode(statusCode int) error {
 	if statusCode >= 300 || statusCode < 200 {
 		return fmt.Errorf("statusCode indicates error, without details: %d", statusCode)
 	}
+
 	return nil
 }

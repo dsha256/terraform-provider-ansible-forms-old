@@ -7,19 +7,21 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"golang.org/x/exp/slog"
 )
 
 // Request represents a request to a REST API
 type Request struct {
-	Method string                 `json:"method"`
-	Body   map[string]interface{} `json:"body"`
-	Query  url.Values             `json:"query"`
+	Method string         `json:"method"`
+	Body   map[string]any `json:"body"`
+	Query  url.Values     `json:"query"`
 	// uuid   string
 }
 
 // BuildHTTPReq builds an HTTP request to carry out the REST request
 func (r *Request) BuildHTTPReq(c *HTTPClient, baseURL string) (*http.Request, error) {
-	url, err := r.BuildURL(c, baseURL, "")
+	_url, err := r.BuildURL(c, baseURL, "")
 	if err != nil {
 		return nil, err
 	}
@@ -27,13 +29,13 @@ func (r *Request) BuildHTTPReq(c *HTTPClient, baseURL string) (*http.Request, er
 	var body io.Reader
 	if len(r.Body) != 0 {
 		var bodyJSON []byte
-		bodyJSON, err := json.Marshal(r.Body)
+		bodyJSON, err = json.Marshal(r.Body)
 		if err != nil {
 			return nil, err
 		}
 		body = bytes.NewReader(bodyJSON)
 	}
-	req, err = http.NewRequest(r.Method, url, body)
+	req, err = http.NewRequest(r.Method, _url, body)
 
 	if err != nil {
 		return nil, err
@@ -77,6 +79,7 @@ func (r *Request) BuildURL(c *HTTPClient, baseURL string, uuid string) (string, 
 	if len(r.Query) != 0 {
 		u.RawQuery = r.Query.Encode()
 	}
+
 	return u.String(), nil
 }
 
@@ -104,7 +107,12 @@ func (r *Request) getToken(c *HTTPClient) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			slog.Error("error closing body", err)
+		}
+	}(resp.Body)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
