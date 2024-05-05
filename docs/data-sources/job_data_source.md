@@ -3,12 +3,12 @@
 page_title: "ansible-forms_job_data_source Data Source - terraform-provider-ansible-forms"
 subcategory: ""
 description: |-
-  Job JobGetDataSourceModel Source
+  Job data source retrieves job data of Ansible Forms.
 ---
 
 # Data Source job
 
-Retrieves an existing job
+Job Data Source
 
 ## Example Usage
 
@@ -28,9 +28,16 @@ data "ansible-forms_job_data_source" "job" {
 
 ### Read-Only
 
+- `approval` (String) Approval of a job.
+- `counter` (Number) Counter of a job.
 - `credentials` (Map of String)
+- `end` (String) End time of a job.
 - `extravars` (Map of String)
 - `form_name` (String) Form Name.
 - `id` (Number) The ID of this resource.
 - `last_updated` (String)
+- `no_of_records` (Number) Number of records of a job.
+- `output` (String) Output of a job.
+- `start` (String) Start time of a job.
 - `status` (String)
+- `target` (String) Target form of a job.
