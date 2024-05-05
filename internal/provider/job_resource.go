@@ -317,7 +317,11 @@ func (r *JobResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 
 	errorHandler := utils.NewErrorHandler(ctx, &resp.Diagnostics)
 	if data.ID.IsNull() {
-		errorHandler.MakeAndReportError("ID is null", "job ID is null")
+		err := errorHandler.MakeAndReportError("ID is null", "job ID is null")
+		if err != nil {
+			tflog.Debug(ctx, fmt.Sprintf("failed reporting err: %v", err))
+			return
+		}
 		return
 	}
 
