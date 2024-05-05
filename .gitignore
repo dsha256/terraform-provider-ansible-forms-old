@@ -1,5 +1,38 @@
-# JetBrains
+*.dll
+*.exe
+.DS_Store
+example.tf
+terraform.tfplan
+#terraform.tfstate
+bin/
+dist/
+modules-dev/
+/pkg/
+website/.vagrant
+website/.bundle
+website/build
+website/node_modules
+.vagrant/
+*.backup
+./*.tfstate
+.terraform/
+*.log
+*.bak
+*~
+.*.swp
 .idea
+*.iml
+*.test
+*.iml
 
-# Temporary Files - Used by a developer as the black paper
+website/vendor
+
+# Test exclusions
+!command/test-fixtures/**/*.tfstate
+!command/test-fixtures/**/.terraform/
+
+# Keep windows files with windows line endings
+*.winfile eol=crlf
+
+# Temp files
 temp
