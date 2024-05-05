@@ -25,7 +25,7 @@ func TestRestClient_GetNilOrOneRecord(t *testing.T) {
 			{"GET", "cluster", 200, RestResponse{NumRecords: 0}, nil},
 		},
 		// "test_no_records_3": {
-		// 	{"GET", "cluster", 200, RestResponse{NumRecords: 1, Records: []map[string]interface{}{}}, nil},
+		// 	{"GET", "cluster", 200, RestResponse{NumRecords: 1, Records: []map[string]any{}}, nil},
 		// },
 		"test_one_record_1": {
 			{"GET", "cluster", 200, oneRecord, nil},

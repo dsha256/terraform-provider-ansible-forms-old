@@ -11,9 +11,9 @@ import (
 
 // Request represents a request to a REST API
 type Request struct {
-	Method string                 `json:"method"`
-	Body   map[string]interface{} `json:"body"`
-	Query  url.Values             `json:"query"`
+	Method string         `json:"method"`
+	Body   map[string]any `json:"body"`
+	Query  url.Values     `json:"query"`
 	// uuid   string
 }
 
@@ -77,6 +77,7 @@ func (r *Request) BuildURL(c *HTTPClient, baseURL string, uuid string) (string, 
 	if len(r.Query) != 0 {
 		u.RawQuery = r.Query.Encode()
 	}
+
 	return u.String(), nil
 }
 

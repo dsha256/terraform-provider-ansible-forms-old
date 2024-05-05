@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-// HTTPClient represents a client for interaction with a ONTAP REST API
+// HTTPClient represents a client for interaction with an Ansible Forms REST API
 type HTTPClient struct {
 	cxProfile  HTTPProfile
 	ctx        context.Context
@@ -26,6 +26,18 @@ type HTTPProfile struct {
 	Username      string
 	Password      string
 	ValidateCerts bool
+}
+
+// NewClient creates a new HTTP client
+func NewClient(ctx context.Context, cxProfile HTTPProfile, tag string) HTTPClient {
+	client := HTTPClient{
+		cxProfile: cxProfile,
+		ctx:       ctx,
+		tag:       tag,
+	}
+	client.httpClient = client.create()
+
+	return client
 }
 
 // Do sends the API Request, parses the response as JSON, and returns the HTTP status code as int, the "result" value as byte
@@ -69,21 +81,11 @@ func (c *HTTPClient) Do(baseURL string, req *Request) (int, []byte, error) {
 	return httpRes.StatusCode, body, nil
 }
 
-// NewClient creates a new HTTP client
-func NewClient(ctx context.Context, cxProfile HTTPProfile, tag string) HTTPClient {
-	client := HTTPClient{
-		cxProfile: cxProfile,
-		ctx:       ctx,
-		tag:       tag,
-	}
-	client.httpClient = client.create()
-	return client
-}
-
 // create configures and creates the http client
-func (c HTTPClient) create() http.Client {
+func (c *HTTPClient) create() http.Client {
 	if !c.cxProfile.ValidateCerts {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
+
 	return http.Client{Timeout: 120 * time.Second}
 }

@@ -32,22 +32,23 @@ type JobResourceModel struct {
 }
 
 type JobGetDataSourceModel struct {
-	ID            int64  `mapstructure:"id"`
-	Form          string `mapstructure:"form"`
-	Target        string `mapstructure:"target"`
-	Status        string `mapstructure:"status"`
-	Start         string `mapstructure:"start"`
-	End           string `mapstructure:"end"`
-	User          string `mapstructure:"user"`
-	UserType      string `mapstructure:"user_type"`
-	JobType       string `mapstructure:"job_type"`
-	Extravars     string `mapstructure:"extravars"`
-	Credentials   string `mapstructure:"credentials"`
-	Notifications string `mapstructure:"notifications"`
-	NoOfRecords   int64  `mapstructure:"no_of_records"`
-	Counter       int64  `mapstructure:"counter"`
-	Output        string `mapstructure:"output"`
-	Approval      string `mapstructure:"approval"`
+	ID          int64  `mapstructure:"id"`
+	Start       string `mapstructure:"start"`
+	End         string `mapstructure:"end"`
+	User        string `mapstructure:"user"`
+	UserType    string `mapstructure:"user_type"`
+	JobType     string `mapstructure:"job_type"`
+	Extravars   string `mapstructure:"extravars"`
+	Credentials string `mapstructure:"credentials"`
+	Form        string `mapstructure:"formName"`
+	Status      string `mapstructure:"status"`
+	Message     string `mapstructure:"message"`
+	Target      string `mapstructure:"target"`
+	NoOfRecords int64  `mapstructure:"no_of_records"`
+	Counter     int64  `mapstructure:"counter"`
+	Output      string `mapstructure:"output"`
+	Data        string `mapstructure:"data"`
+	Approval    string `mapstructure:"approval"`
 }
 
 // GetJobResponse describes GET job response.
@@ -80,6 +81,8 @@ func GetJobByID(errorHandler *utils.ErrorHandler, r restclient.RestClient, id st
 		return nil, errorHandler.MakeAndReportError("failed to decode response from GET job", fmt.Sprintf("error: %s, statusCode %d, response %#v", err, statusCode, response))
 	}
 	tflog.Debug(errorHandler.Ctx, fmt.Sprintf("read job info: %#v", apiResp.Data))
+
+	apiResp.Data.Status = apiResp.Status
 
 	return &apiResp.Data, nil
 }

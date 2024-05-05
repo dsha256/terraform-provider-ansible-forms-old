@@ -131,8 +131,8 @@ func (d *JobDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 	data.ID = types.Int64Value(restInfo.ID)
 	data.FormName = types.StringValue(restInfo.Form)
 	data.Status = types.StringValue(restInfo.Status)
-	data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Extravars)
-	data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Credentials)
+	//data.Extravars = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Extravars)
+	//data.Credentials = jsonStringToMapValue(ctx, &resp.Diagnostics, restInfo.Credentials)
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log

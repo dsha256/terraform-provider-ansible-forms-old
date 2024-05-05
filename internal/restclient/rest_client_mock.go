@@ -28,10 +28,11 @@ func NewMockedRestClient(responses []MockResponse) (*RestClient, error) {
 	}
 	newRestClient.mode = "mock"
 	newRestClient.responses = responses
+
 	return newRestClient, nil
 }
 
-func (r *RestClient) mockCallAPIMethod(method string, baseURL string, query *RestQuery, body map[string]interface{}) (int, RestResponse, error) {
+func (r *RestClient) mockCallAPIMethod(method string, baseURL string, query *RestQuery, body map[string]any) (int, RestResponse, error) {
 	if len(r.responses) == 0 {
 		panic(fmt.Sprintf("Unexpected request: %s %s", method, baseURL))
 	}
@@ -43,5 +44,6 @@ func (r *RestClient) mockCallAPIMethod(method string, baseURL string, query *Res
 	}
 	// remove element now that we know it is consumed
 	r.responses = r.responses[1:]
+
 	return expectedResponse.StatusCode, expectedResponse.Response, expectedResponse.Err
 }
